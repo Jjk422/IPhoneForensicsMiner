@@ -98,7 +98,7 @@ class IPhoneParser:
         return self.parsed_info_file['Last Backup Date']
 
     def get_iphone_MEID(self):
-        return self.parsed_info_file['MEID']
+        return self.parsed_info_file['MEID'] if 'MEID' in self.parsed_info_file else ''
 
     def get_iphone_phone_number(self):
         return self.parsed_info_file['Phone Number']

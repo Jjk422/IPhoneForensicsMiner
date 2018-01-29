@@ -67,7 +67,6 @@ def check_and_convert_illegal_xml_tag_start(tag):
 def parse_storage_master_to_xml(storage_master):
     # TODO: Add this Parsing method into functions to allow for easier to read and less repeating code
     root_elem = ElementTree.Element('root')
-    # backup_number_elem = args.backup_paths[i]
 
     for storage_category, storage_data in storage_master.items():
         title_elem = ElementTree.SubElement(root_elem, storage_category)
@@ -111,7 +110,7 @@ def create_text_file(master_storage, text_output_file_path):
     except IOError as err:
         print("I/O error: {0}".format(err))
     except:
-        print(f"An unexpected error occurred")
+        print(f"TXT file '{text_output_file_path}' failed to write")
         raise
 
 
@@ -119,7 +118,13 @@ def create_text_file(master_storage, text_output_file_path):
 def create_xml_file(master_storage, xml_output_file_path):
     root = parse_storage_master_to_xml(master_storage)
     tree = ElementTree.ElementTree(root)
-    tree.write(xml_output_file_path)
+
+    try:
+        tree.write(xml_output_file_path)
+        print(f"XML file '{xml_output_file_path} written successfully'")
+    except:
+        print(f"XML file '{xml_output_file_path}' failed to write")
+        raise
 
 
 # Displays all information in the master storage
@@ -143,15 +148,21 @@ for backup_path in args.backup_paths:
     parsed_manifest_file = parse_plist_file(f'{backup_path}\{Constants.PLIST_FILE_MANIFEST_NAME}')
     parsed_status_file = parse_plist_file(f'{backup_path}\{Constants.PLIST_FILE_STATUS_NAME}')
 
-    iphone_parser = iphone_parser.IPhoneParser(parsed_info_file, parsed_manifest_file, parsed_status_file)
+    iphone_parser_instance = iphone_parser.IPhoneParser(parsed_info_file, parsed_manifest_file, parsed_status_file)
 
-    iphone_parser.parse()
+    iphone_parser_instance.parse()
 
     if not args.min_std_out:
-        display_all_information(iphone_parser.get_storage_master())
+        display_all_information(iphone_parser_instance.get_storage_master())
 
     if args.xml_output_file:
-        create_xml_file(iphone_parser.get_storage_master(), f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{iphone_parser.get_iphone_system_information()['IMEI']}_{args.xml_output_path}")
+        create_xml_file(
+            iphone_parser_instance.get_storage_master(),
+            f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{iphone_parser_instance.get_iphone_system_information()['IMEI']}_{args.xml_output_path}"
+        )
 
     if args.txt_output_file:
-       create_text_file(iphone_parser.get_storage_master(), f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{iphone_parser.get_iphone_system_information()['IMEI']}_{args.txt_output_path}")
+       create_text_file(
+           iphone_parser_instance.get_storage_master(),
+           f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{iphone_parser_instance.get_iphone_system_information()['IMEI']}_{args.txt_output_path}"
+       )
