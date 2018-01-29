@@ -119,7 +119,7 @@ def create_text_file(master_storage, text_output_file_path):
 def create_xml_file(master_storage, xml_output_file_path):
     root = parse_storage_master_to_xml(master_storage)
     tree = ElementTree.ElementTree(root)
-    tree.write('xml_test_output.xml')
+    tree.write(xml_output_file_path)
 
 
 # Displays all information in the master storage
