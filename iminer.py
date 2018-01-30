@@ -6,9 +6,18 @@ import re
 import Constants
 import iphone_parser
 
+"""
+.. module:: iminer.py
+   :platform: Windows
+   :synopsis: Main iminer script
 
+.. moduleauthor:: Jason Keighley
+"""
 # Parse a plist file
 def parse_plist_file(file_path):
+    """
+    Parse the given plist file returning a dictionary containing the data
+    """
     with open(file_path, 'rb') as file_pointer:
         plist_file = plistlib.load(file_pointer)
     return plist_file
@@ -16,14 +25,15 @@ def parse_plist_file(file_path):
 
 # Convert dictionary key names to readable names (product_version -> Product version)
 def convert_to_readable(string):
+    """
+    Convert dictionary key names to readable names (e.g. product_version -> Product version)
+    """
     return ' '.join(string.split('_')).capitalize()
 
-
-def convert_to_xml(string):
-    return ''.join(string.split('\n'))
-
-
 def parse_storage_master_to_txt(storage_master):
+    """
+    Parse and return the given dictionary (storage_master) in a txt human readable file format
+    """
     parsed_text_array = []
 
     for storage_category, storage_data in storage_master.items():
@@ -60,11 +70,17 @@ def parse_storage_master_to_txt(storage_master):
 
 
 def check_and_convert_illegal_xml_tag_start(tag):
+    """
+    Check for illegal xml tag names and append @XML_IGNORE_CHARACTER_STRING if an illegal name is found (e.g. starts with a number)
+    """
     tag = str(tag)
     return f"{Constants.XML_IGNORE_CHARACTER_STRING}{tag}" if re.match('^\d', str(tag)) else tag
 
 
 def parse_storage_master_to_xml(storage_master):
+    """
+    Parse and return the given dictionary (storage_master) in a xml file format
+    """
     # TODO: Add this Parsing method into functions to allow for easier to read and less repeating code
     root_elem = ElementTree.Element('root')
 
@@ -99,8 +115,10 @@ def parse_storage_master_to_xml(storage_master):
     return root_elem
 
 
-# Create text file, requires array of dictionaries and desired txt file path
 def create_text_file(master_storage, text_output_file_path):
+    """
+    Create and print to a text file (requires array of dictionaries and desired txt file path)
+    """
     try:
         with open(text_output_file_path, 'w') as file_pointer:
             file_pointer.write(''.join(parse_storage_master_to_txt(master_storage)))
@@ -114,8 +132,10 @@ def create_text_file(master_storage, text_output_file_path):
         raise
 
 
-# Create XML file, requires array of dictionaries and desired xml file path
 def create_xml_file(master_storage, xml_output_file_path):
+    """
+    Create and print to an xml file (requires array of dictionaries and desired xml file path)
+    """
     root = parse_storage_master_to_xml(master_storage)
     tree = ElementTree.ElementTree(root)
 
@@ -126,43 +146,45 @@ def create_xml_file(master_storage, xml_output_file_path):
         print(f"XML file '{xml_output_file_path}' failed to write")
         raise
 
-
-# Displays all information in the master storage
 def display_all_information(storage_master):
+    """
+    Displays all information within the master storage in a human readable txt format
+    """
     for element in parse_storage_master_to_txt(storage_master):
         print(element, end='')
 
 
-parser = argparse.ArgumentParser(description='Analyse IPhone backups.')
-parser.add_argument('backup_paths', help='The path to the IPhone backup', nargs='+')
-parser.add_argument('--xml_output_path', help='The path to the desired xml path', nargs='?', default=Constants.DEFAULT_XML_OUTPUT_PATH)
-parser.add_argument('--txt_output_path', help='The path to the desired txt path', nargs='?', default=Constants.DEFAULT_TXT_OUTPUT_PATH)
-parser.add_argument('--xml_output_file', help='Create an xml output file', action='store_true')
-parser.add_argument('--txt_output_file', help='Create a txt output file', action='store_true')
-parser.add_argument('--min_std_out', help='Set the std output to the minimum amount', action='store_true')
-args = parser.parse_args()
-args.backup_paths.pop(0)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Analyse IPhone backups.')
+    parser.add_argument('backup_paths', help='The path to the IPhone backup', nargs='+')
+    parser.add_argument('--xml_output_path', help='The path to the desired xml path', nargs='?', default=Constants.DEFAULT_XML_OUTPUT_PATH)
+    parser.add_argument('--txt_output_path', help='The path to the desired txt path', nargs='?', default=Constants.DEFAULT_TXT_OUTPUT_PATH)
+    parser.add_argument('--xml_output_file', help='Create an xml output file', action='store_true')
+    parser.add_argument('--txt_output_file', help='Create a txt output file', action='store_true')
+    parser.add_argument('--min_std_out', help='Set the std output to the minimum amount', action='store_true')
+    args = parser.parse_args()
+    args.backup_paths.pop(0)
 
-for backup_path in args.backup_paths:
-    parsed_info_file = parse_plist_file(f'{backup_path}\{Constants.PLIST_FILE_INFO_NAME}')
-    parsed_manifest_file = parse_plist_file(f'{backup_path}\{Constants.PLIST_FILE_MANIFEST_NAME}')
-    parsed_status_file = parse_plist_file(f'{backup_path}\{Constants.PLIST_FILE_STATUS_NAME}')
+    for backup_path in args.backup_paths:
+        parsed_info_file = parse_plist_file(f'{backup_path}\{Constants.PLIST_FILE_INFO_NAME}')
+        parsed_manifest_file = parse_plist_file(f'{backup_path}\{Constants.PLIST_FILE_MANIFEST_NAME}')
+        parsed_status_file = parse_plist_file(f'{backup_path}\{Constants.PLIST_FILE_STATUS_NAME}')
 
-    iphone_parser_instance = iphone_parser.IPhoneParser(parsed_info_file, parsed_manifest_file, parsed_status_file)
+        iphone_parser_instance = iphone_parser.IPhoneParser(parsed_info_file, parsed_manifest_file, parsed_status_file)
 
-    iphone_parser_instance.parse()
+        iphone_parser_instance.parse()
 
-    if not args.min_std_out:
-        display_all_information(iphone_parser_instance.get_storage_master())
+        if not args.min_std_out:
+            display_all_information(iphone_parser_instance.get_storage_master())
 
-    if args.xml_output_file:
-        create_xml_file(
-            iphone_parser_instance.get_storage_master(),
-            f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{iphone_parser_instance.get_iphone_system_information()['IMEI']}_{args.xml_output_path}"
-        )
+        if args.xml_output_file:
+            create_xml_file(
+                iphone_parser_instance.get_storage_master(),
+                f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{iphone_parser_instance.get_iphone_system_information()['IMEI']}_{args.xml_output_path}"
+            )
 
-    if args.txt_output_file:
-       create_text_file(
-           iphone_parser_instance.get_storage_master(),
-           f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{iphone_parser_instance.get_iphone_system_information()['IMEI']}_{args.txt_output_path}"
-       )
+        if args.txt_output_file:
+           create_text_file(
+               iphone_parser_instance.get_storage_master(),
+               f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{iphone_parser_instance.get_iphone_system_information()['IMEI']}_{args.txt_output_path}"
+           )
