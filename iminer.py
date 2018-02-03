@@ -53,19 +53,26 @@ def parse_storage_master_to_txt(storage_master):
         parsed_text_array.append(f"{'-' * len(title)}\n{title}\n{'-'* len(title)}\n")
 
         if isinstance(storage_data, list):
-            # Create columns
-            for key in storage_data[0].keys():
-                parsed_text_array.append(
-                    f"* {convert_to_readable(key)} *{Constants.COLUMN_FILLER_CHARACTER * (Constants.COLUMN_WIDTH - (len(key) + 4))}")
-            parsed_text_array.append("\n")
-
-            # Populate columns with data
-            for list_item in storage_data:
-                for iphone_information_key, iphone_information_data in list_item.items():
+            if isinstance(storage_data[0], dict):
+                # Create columns
+                for key in storage_data[0].keys():
                     parsed_text_array.append(
-                        f"{iphone_information_data}{Constants.COLUMN_FILLER_CHARACTER * (Constants.COLUMN_WIDTH - len(str(iphone_information_data)))}"
-                    )
+                        f"* {convert_to_readable(key)} *{Constants.COLUMN_FILLER_CHARACTER * (Constants.COLUMN_WIDTH - (len(key) + 4))}")
                 parsed_text_array.append("\n")
+
+                # Populate columns with data
+                for list_item in storage_data:
+                    for iphone_information_key, iphone_information_data in list_item.items():
+                        parsed_text_array.append(
+                            f"{iphone_information_data}{Constants.COLUMN_FILLER_CHARACTER * (Constants.COLUMN_WIDTH - len(str(iphone_information_data)))}"
+                        )
+                    parsed_text_array.append("\n")
+            else:
+                for list_item in storage_data:
+                    parsed_text_array.append(
+                        f"{list_item}\n"
+                    )
+
         elif isinstance(storage_data, dict):
             for iphone_information_key, iphone_information_data in storage_data.items():
                 if isinstance(iphone_information_data, dict):
@@ -110,9 +117,12 @@ def parse_storage_master_to_xml(storage_master):
         if isinstance(storage_data, list):
             for list_item in storage_data:
                 list_item_elem = ElementTree.SubElement(title_elem, 'Item')
-                for iphone_information_key, iphone_information_data in list_item.items():
-                    iphone_information_key_elem = ElementTree.SubElement(list_item_elem, iphone_information_key)
-                    iphone_information_key_elem.text = str(iphone_information_data)
+                if isinstance(list_item, dict):
+                    for iphone_information_key, iphone_information_data in list_item.items():
+                        iphone_information_key_elem = ElementTree.SubElement(list_item_elem, iphone_information_key)
+                        iphone_information_key_elem.text = str(iphone_information_data)
+                else:
+                    list_item_elem.text = str(iphone_information_data)
         elif isinstance(storage_data, dict):
             for iphone_information_key, iphone_information_data in storage_data.items():
                 if isinstance(iphone_information_data, dict):
@@ -213,13 +223,9 @@ def main():
         )
 
         iphone_parser_instance.parse()
-        iphone_parser_instance.parse_and_index_all_iphone_files()
-
-        # iphone_parser_instance.print_database_tables_manifest()
-        # iphone_parser_instance.print_database_tables_iminer()
-        #
-        # iphone_parser_instance.print_database_rows_manifest()
-        # iphone_parser_instance.print_database_rows_iminer()
+        database_read_success = iphone_parser_instance.parse_and_index_all_iphone_files()
+        if database_read_success:
+            iphone_parser_instance.parse_indexed_files()
 
         if not args.min_std_out:
             display_all_information(iphone_parser_instance.get_storage_master())

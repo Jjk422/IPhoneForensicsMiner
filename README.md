@@ -1,7 +1,7 @@
 # iPhoneInformationGatherer
 ## What is it
 Small tool that gathers data from iphone backups.  
-Currently does not analyse file contents (photos and other documents on IPhone) but this is planned to be added in soon.
+Currently does not analyse all file contents (photos and other documents on IPhone) but this is planned to be added in soon.
 
 ## How to
 ### Required programs

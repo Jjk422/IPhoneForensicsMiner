@@ -373,6 +373,29 @@ class IPhoneParser:
         """
         return self.parsed_status_file['SnapshotState']
 
+    def search_manifest_database(self, column_to_search, search_string):
+        for file in self.storage_master['iphone_file_contents']:
+            if search_string in file[column_to_search]:
+                return file
+        return False
+
+    def get_paired_devices(self):
+        """
+        Get paired devices information from Iphone backup
+        :return: Return database rows of all paired devices
+        """
+        search_column = Constants.DEFAULT_SQL_STORAGE_COLUMNS_LIST_FORM[2] # Relative path search
+        file_dict = self.search_manifest_database(search_column, Constants.PAIRED_BLUETOOTH_DEVICES_DB_PATH)
+        absolute_file_path = Constants.DEFAULT_SQL_STORAGE_COLUMNS_LIST_FORM[4]
+
+        if file_dict is not False:
+            return self.database_handle.get_db_content(
+                file_dict[absolute_file_path],
+                Constants.PAIRED_BLUETOOTH_DEVICES_DB_TABLE
+            )
+        else:
+            return ''
+
     # Collection output methods
     def get_iphone_applications(self):
         """
@@ -488,6 +511,11 @@ class IPhoneParser:
         return self.storage_master
 
     def get_iphone_content_file_from_fileID(self, fileID):
+        """
+        Get the iphone content file information from its file id
+        :param fileID: FileID of the file
+        :return: Content file absolute path or '' if failed
+        """
         if not os.path.isdir(f"{self.backup_path}\{fileID[:2]}"):
             return ''
 
@@ -521,7 +549,6 @@ class IPhoneParser:
             self.database_handle.commit_database_changes()
             return True
         else:
-
             return False
 
 
@@ -544,8 +571,17 @@ class IPhoneParser:
         content_files = self.analyse_iphone_content_files()
         if content_files is not False:
             self.get_database_rows_iphone_content_files()
+            return True
         else:
             self.storage_master['iphone_file_contents'] = 'Database read failed, check database is not encrypted.'
+            return False
+
+    def parse_indexed_files(self):
+        """
+        Parse all indexed files (gather information like paired devices)
+        :return: Void
+        """
+        self.storage_master['paired_devices'] = self.get_paired_devices()
 
     # TODO: Use or remove unused methods
     # def print_database_rows_manifest(self):

@@ -1,3 +1,5 @@
+import re
+
 # Iphone file names
 PLIST_FILE_INFO_NAME = 'Info.plist'
 """
@@ -57,11 +59,27 @@ COLUMN_WIDTH = 75
 """
 Column width of columns to be used for formatting to txt files or stdout
 """
-COLUMN_FILLER_CHARACTER = '-'
+# COLUMN_FILLER_CHARACTER = '-'
+COLUMN_FILLER_CHARACTER = ' '
 """
 Filler character to use for column formatting (Usually ' ' or '-')
 """
 XML_IGNORE_CHARACTER_STRING = 'IMINER-TAG-IGNORE--'
 """
 XML tag appending string if the tag begins with an illegal character (a number or punctuation)
+"""
+REGEX_CAMEL_CASE_SEARCH_EXPRESSION = re.compile("(?!^)([A-Z]+)")
+"""
+Regular expression to check for CamelCase characters other then first letter (used for conversion to snake_case)
+"""
+
+# IPhone backup file paths
+## Paired Devices
+PAIRED_BLUETOOTH_DEVICES_DB_TABLE = 'PairedDevices'
+"""
+Default sqlite database table name for the paired devices database
+"""
+PAIRED_BLUETOOTH_DEVICES_DB_PATH = 'Library/Database/com.apple.MobileBluetooth.ledevices.paired.db'
+"""
+Default relative path in the IOS file system of the database file
 """

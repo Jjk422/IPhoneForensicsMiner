@@ -1,5 +1,6 @@
 import sqlite3
 import Constants
+import re
 
 
 class IphoneFileDatabase:
@@ -87,6 +88,41 @@ class IphoneFileDatabase:
 
         sql_command = f"UPDATE {self.file_database_table_name} SET {','.join(update_key_value_array)};"
         self.file_database_cursor.execute(sql_command)
+
+    def convert_camel_case_to_snake_case(self, string):
+        """
+        Convert a CamelCase string to snake_case
+        :param string: CamelCase string
+        :return: string in snake_case
+        """
+        return Constants.REGEX_CAMEL_CASE_SEARCH_EXPRESSION.sub(r'_\1', string).lower()
+
+
+    def get_db_content(self, db_file_path, table_name):
+        """
+        Get all information within the given db file within the iphone backup in the form of rows.
+        :return: Return the rows from the given db file within the iphone backup.
+        """
+        try:
+            db_database_connection = sqlite3.connect(db_file_path)
+            db_database_cursor = db_database_connection.cursor()
+            db_table_name = table_name
+
+            database_rows = []
+            sql_command = f"SELECT * FROM {db_table_name}"
+            for row in db_database_cursor.execute(sql_command):
+                row_dictionary = {}
+                for index, value in enumerate(row):
+                    # TODO: Finish regular expression to change camel case to snake case using self.convert_camel_case_to_snake_case(), (Current function converts non CamelCase versions like GATTserviceChangeConfig to g_attservice_change_config)
+                    row_dictionary[self.convert_camel_case_to_snake_case(db_database_cursor.description[index][0])] = value
+
+                database_rows.append(row_dictionary)
+            db_database_connection.close()
+            return database_rows
+        except:
+            raise
+            print(f"Database file {db_file_path} could not be opened, check if it is encrypted.")
+            return ''
 
     def get_manifest_db(self):
         """
