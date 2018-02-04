@@ -74,12 +74,30 @@ Regular expression to check for CamelCase characters other then first letter (us
 """
 
 # IPhone backup file paths
-## Paired Devices
+## Paired Devices (paired.db)
 PAIRED_BLUETOOTH_DEVICES_DB_TABLE = 'PairedDevices'
 """
 Default sqlite database table name for the paired devices database
 """
 PAIRED_BLUETOOTH_DEVICES_DB_PATH = 'Library/Database/com.apple.MobileBluetooth.ledevices.paired.db'
+"""
+Default relative path in the IOS file system of the database file
+"""
+## Voicemail information (voicemail.db)
+VOICEMAIL_INFORMATION_DB_TABLE = 'voicemail'
+"""
+Default sqlite database table name for the voicemail information database
+"""
+VOICEMAIL_INFORMATION_DB_PATH = 'Library/Voicemail/voicemail.db'
+"""
+Default relative path in the IOS file system of the database file
+"""
+## SMS information (sms.db)
+SMS_MESSAGE_INFORMATION_DB_TABLE = 'message'
+"""
+Default sqlite database table name for the sms information database
+"""
+SMS_MESSAGE_INFORMATION_DB_PATH = 'Library/SMS/sms.db'
 """
 Default relative path in the IOS file system of the database file
 """

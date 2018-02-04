@@ -374,27 +374,58 @@ class IPhoneParser:
         return self.parsed_status_file['SnapshotState']
 
     def search_manifest_database(self, column_to_search, search_string):
+        """
+        Search the local manifest database dictionary (storage_master ['iphone_file_contents']) for the given value
+        :param column_to_search: Column to search for the manifest database
+        :param search_string: Search string to compare to the values in the manifest database
+        :return: return the file dictionary if match found, else return False
+        """
         for file in self.storage_master['iphone_file_contents']:
             if search_string in file[column_to_search]:
                 return file
         return False
+
+    def parse_database_file(self, search_string, table_name):
+        """
+        Parse and read from the database file specified from the relative IOS path and the database table name
+        :param search_string: Search string to search in database for (Relative path to database file on IOS)
+        :param table_name: Table name in the database to read from
+        :return: Return a list dictionary containing each column to the value
+        """
+        search_column = Constants.DEFAULT_SQL_STORAGE_COLUMNS_LIST_FORM[2] # Relative path search
+        file_dict = self.search_manifest_database(search_column, search_string)
+        absolute_file_path = Constants.DEFAULT_SQL_STORAGE_COLUMNS_LIST_FORM[4]
+
+        if file_dict is not False:
+            return self.database_handle.get_db_content(
+                file_dict[absolute_file_path],
+                table_name
+            )
+        else:
+            return ''
 
     def get_paired_devices(self):
         """
         Get paired devices information from Iphone backup
         :return: Return database rows of all paired devices
         """
-        search_column = Constants.DEFAULT_SQL_STORAGE_COLUMNS_LIST_FORM[2] # Relative path search
-        file_dict = self.search_manifest_database(search_column, Constants.PAIRED_BLUETOOTH_DEVICES_DB_PATH)
-        absolute_file_path = Constants.DEFAULT_SQL_STORAGE_COLUMNS_LIST_FORM[4]
+        return self.parse_database_file(Constants.PAIRED_BLUETOOTH_DEVICES_DB_PATH, Constants.PAIRED_BLUETOOTH_DEVICES_DB_TABLE)
 
-        if file_dict is not False:
-            return self.database_handle.get_db_content(
-                file_dict[absolute_file_path],
-                Constants.PAIRED_BLUETOOTH_DEVICES_DB_TABLE
-            )
-        else:
-            return ''
+    def get_voicemail_information(self):
+        """
+        Get voicemail information from Iphone backup via the Voicemail.db file
+        :return: Return database rows containing voicemail information
+        """
+        # TODO: Parse all other tables within the voicemail.db database
+        return self.parse_database_file(Constants.VOICEMAIL_INFORMATION_DB_PATH, Constants.VOICEMAIL_INFORMATION_DB_TABLE)
+
+    def get_sms_message_information(self):
+        """
+        Get sms message information from Iphone backup via the sms.db file
+        :return: Return database rows containing SMS message information
+        """
+        # TODO: Parse all other tables within the sms.db database
+        return self.parse_database_file(Constants.SMS_MESSAGE_INFORMATION_DB_PATH, Constants.SMS_MESSAGE_INFORMATION_DB_TABLE)
 
     # Collection output methods
     def get_iphone_applications(self):
@@ -582,6 +613,8 @@ class IPhoneParser:
         :return: Void
         """
         self.storage_master['paired_devices'] = self.get_paired_devices()
+        self.storage_master['voicemail_information'] = self.get_voicemail_information()
+        self.storage_master['sms_message_information'] = self.get_sms_message_information()
 
     # TODO: Use or remove unused methods
     # def print_database_rows_manifest(self):

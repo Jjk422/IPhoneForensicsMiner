@@ -97,7 +97,6 @@ class IphoneFileDatabase:
         """
         return Constants.REGEX_CAMEL_CASE_SEARCH_EXPRESSION.sub(r'_\1', string).lower()
 
-
     def get_db_content(self, db_file_path, table_name):
         """
         Get all information within the given db file within the iphone backup in the form of rows.
