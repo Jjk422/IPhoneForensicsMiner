@@ -3,6 +3,17 @@
 Small tool that gathers data from iphone backups.  
 Currently does not analyse all file contents (photos and other documents on IPhone) but this is planned to be added in soon.
 
+## Features
+* Analyse IPhone backup
+* Get IPhone system information
+* IPhone applications
+* Get ITunes and IBooks information (requires more in depth detail)
+* Get IPhone backup and status information
+* Get IPhone paired Bluetooth devices
+* Get IPhone Voicemail information
+* Get IPhone SMS message information
+* Get IPhone safari web browser history items
+
 ## How to
 ### Required programs
 Python 3: https://www.python.org/downloads/

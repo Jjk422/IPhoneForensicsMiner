@@ -381,8 +381,11 @@ class IPhoneParser:
         :return: return the file dictionary if match found, else return False
         """
         for file in self.storage_master['iphone_file_contents']:
-            if search_string in file[column_to_search]:
+            if search_string == file[column_to_search]:
                 return file
+
+            # if search_string in file[column_to_search]:
+            #     return file
         return False
 
     def parse_database_file(self, search_string, table_name):
@@ -426,6 +429,26 @@ class IPhoneParser:
         """
         # TODO: Parse all other tables within the sms.db database
         return self.parse_database_file(Constants.SMS_MESSAGE_INFORMATION_DB_PATH, Constants.SMS_MESSAGE_INFORMATION_DB_TABLE)
+
+    def get_safari_web_history_items(self):
+        """
+        Get safari web history items information from Iphone backup via the safari/History.db file
+        :return: Return database rows containing SMS message information
+        """
+        return self.parse_database_file(
+            Constants.SAFARI_WEB_HISTORY_DB_PATH,
+            Constants.SAFARI_WEB_HISTORY_ITEMS_DB_TABLE
+        )
+
+    def get_safari_web_history_visits(self):
+        """
+        Get safari web history visits information from Iphone backup via the safari/History.db file
+        :return: Return database rows containing SMS message information
+        """
+        return self.parse_database_file(
+            Constants.SAFARI_WEB_HISTORY_DB_PATH,
+            Constants.SAFARI_WEB_HISTORY_VISITS_DB_TABLE
+        )
 
     # Collection output methods
     def get_iphone_applications(self):
@@ -615,6 +638,9 @@ class IPhoneParser:
         self.storage_master['paired_devices'] = self.get_paired_devices()
         self.storage_master['voicemail_information'] = self.get_voicemail_information()
         self.storage_master['sms_message_information'] = self.get_sms_message_information()
+        self.storage_master['safari_web_history_items'] = self.get_safari_web_history_items()
+        # TODO: Finish history visits parsing utf-8 error, encode data into utf-8 or other
+        # self.storage_master['safari_web_history_visits'] = self.get_safari_web_history_visits()
 
     # TODO: Use or remove unused methods
     # def print_database_rows_manifest(self):

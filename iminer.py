@@ -39,6 +39,27 @@ def convert_to_readable(string):
     """
     return ' '.join(string.split('_')).capitalize() if string is not None else ''
 
+# TODO: Optomise and test basic DYNAMIC COLUMN SCALING functionality, also use this method for all printing columns
+def get_dynamic_column_widths(storage_data):
+    """
+    Calculate maximum needed column width from dictionary.
+    :param storage_data: Dictionary to calculate the column width from
+    :return: Return dictionary of column heading to maximum column width
+    """
+    column_widths = {}
+    for key in storage_data[0].keys():
+        column_widths[str(key)] = len(str(key))
+
+    for list_item in storage_data:
+        for dictionary_key, dictionary_value in list_item.items():
+            if dictionary_value == None:
+                continue
+
+            elif len(str(dictionary_value)) > column_widths[str(dictionary_key)]:
+                column_widths[str(dictionary_key)] = len(str(dictionary_value))
+
+    return column_widths
+
 
 def parse_storage_master_to_txt(storage_master):
     """
@@ -54,23 +75,25 @@ def parse_storage_master_to_txt(storage_master):
 
         if isinstance(storage_data, list):
             if isinstance(storage_data[0], dict):
+                column_widths = get_dynamic_column_widths(storage_data)
+
                 # Create columns
                 for key in storage_data[0].keys():
                     parsed_text_array.append(
-                        f"* {convert_to_readable(key)} *{Constants.COLUMN_FILLER_CHARACTER * (Constants.COLUMN_WIDTH - (len(key) + 4))}")
+                        f"* {convert_to_readable(key)} *{Constants.COLUMN_FILLER_CHARACTER * ( Constants.COLUMN_WIDTH + (column_widths[str(key)] - (len(key) + 4)))}")
                 parsed_text_array.append("\n")
 
                 # Populate columns with data
                 for list_item in storage_data:
                     for iphone_information_key, iphone_information_data in list_item.items():
                         parsed_text_array.append(
-                            f"{iphone_information_data}{Constants.COLUMN_FILLER_CHARACTER * (Constants.COLUMN_WIDTH - len(str(iphone_information_data)))}"
+                            f"{iphone_information_data}{Constants.COLUMN_FILLER_CHARACTER * ( Constants.COLUMN_WIDTH + (column_widths[str(iphone_information_key)] - len(str(iphone_information_data))))}"
                         )
                     parsed_text_array.append("\n")
             else:
                 for list_item in storage_data:
                     parsed_text_array.append(
-                        f"{list_item}\n"
+                        f"{str(list_item)}\n"
                     )
 
         elif isinstance(storage_data, dict):

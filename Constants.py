@@ -53,11 +53,9 @@ Default filename/path for the txt output files
 """
 
 # Formatting
-# TODO: Change this variable to allow for dynamic column scaling
-# COLUMN_WIDTH = 25
-COLUMN_WIDTH = 75
+COLUMN_WIDTH = 5
 """
-Column width of columns to be used for formatting to txt files or stdout
+Column width of columns to be used for formatting to txt files or stdout (adds to dynamic column scaling calculation)
 """
 # COLUMN_FILLER_CHARACTER = '-'
 COLUMN_FILLER_CHARACTER = ' '
@@ -98,6 +96,19 @@ SMS_MESSAGE_INFORMATION_DB_TABLE = 'message'
 Default sqlite database table name for the sms information database
 """
 SMS_MESSAGE_INFORMATION_DB_PATH = 'Library/SMS/sms.db'
+"""
+Default relative path in the IOS file system of the database file
+"""
+## Safari web history (safari/History.db)
+SAFARI_WEB_HISTORY_ITEMS_DB_TABLE = 'history_items'
+"""
+Default sqlite database table name for the safari history items database
+"""
+SAFARI_WEB_HISTORY_VISITS_DB_TABLE = 'history_visits'
+"""
+Default sqlite database table name for the safari history visits database
+"""
+SAFARI_WEB_HISTORY_DB_PATH = 'Library/Safari/History.db'
 """
 Default relative path in the IOS file system of the database file
 """
